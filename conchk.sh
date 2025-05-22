@@ -10,7 +10,9 @@ list(){
 }
 
 add(){
+	if [ "$1" != "" ]; then
 	echo $1 >> links.txt
+	fi
 }
 
 br(){
