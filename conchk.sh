@@ -43,7 +43,7 @@ edit(){
 check() {
 	readarray -t files < links.txt
 	for i in "${files[@]}"; do
-		response="$(curl -iLs $i | grep -o -E "^HTTP/[0-9.]+ [0-9]+" | grep -o -E " [0-9]+" | grep -o -E "[0-9]+"|tail -n1)"
+		response="$(curl -ILs $i | grep -o -E "^HTTP/[0-9.]+ [0-9]+" | grep -o -E " [0-9]+" | grep -o -E "[0-9]+"|tail -n1)"
 		if [ "$response" = "200" ]; then
 			echo "$i is Accessible"
 		elif [ "$response" = "" ]; then
