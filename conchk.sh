@@ -2,6 +2,50 @@
 
 declare -a files
 
+sp=""
+cols=$(tput cols)
+
+for i in $(seq $cols); do
+	sp="$sp "
+done
+
+print(){
+	printf "\033[48;2;50;150;200m"
+	printf "$sp"
+	printf "\033[G"
+	printf "\033[38;2;255;255;255m"
+	echo "$1"
+	printf "\033[0m"
+}
+printSelec(){
+	printf "\033[48;2;250;150;50m"
+	printf "$sp"
+	printf "\033[G"
+	printf "\033[38;2;0;0;0m"
+	echo "$1"
+	printf "\033[0m"
+}
+printImp(){
+	printf "\033[48;2;50;50;250m"
+	for i in $(seq $cols); do
+		printf " "
+	done
+	printf "\033[G"
+	printf "\033[38;2;255;255;255m"
+	echo "$1"
+	printf "\033[0m"
+}
+printImpSelec(){
+	printf "\033[48;2;250;50;50m"
+	for i in $(seq $cols); do
+		printf " "
+	done
+	printf "\033[G"
+	printf "\033[38;2;0;0;0m"
+	echo "$1"
+	printf "\033[0m"
+}
+
 list(){
 	readarray -t files < links.txt
 	for i in "${files[@]}"; do
@@ -99,25 +143,42 @@ moveCurDown(){
 		printf "\033[$1B"
 	fi
 }
-setCurColumn(){
-	if (($1 >= 0)); then
-		printf "\033[$1G"
-	fi
+
+hideCursor(){
+	printf "\033[?25l"
+}
+
+showCursor(){
+	printf "\033[?25h"
 }
 
 menu(){
 	pos=0
 	options=("$@")
 	len=$(("${#options[@]}" + 1))
+
+	hideCursor
+
 	while true; do
-		for i in "${options[@]}"; do
-			echo " $i"
+		for i in $(seq 0 $((len-2))); do
+			if [ "$pos" = "$i" ]; then
+				printSelec ">${options[$i]}"
+			else
+				print " ${options[$i]}"
+			fi
 		done
-		echo "<exit"
+		if [ "$pos" = "$((len-1))" ]; then
+				printImpSelec ">exit"
+		else
+				printImp "<exit"
+		fi
+
 		moveCurUp "$((len-pos))"
-		printf ">"
-		setCurColumn 0
+
+		showCursor
 		awaitInput
+		hideCursor
+
 		keyPressed="$retVal"
 		moveCurUp "$pos"
 		case $keyPressed in
@@ -133,9 +194,11 @@ menu(){
 		esac
 		pos="$(((pos + len) % len))"
 	done
-	moveCurDown "$len"
-	retVal="$pos"
 
+	moveCurDown "$len"
+	showCursor
+
+	retVal="$pos"
 }
 
 interactive(){
