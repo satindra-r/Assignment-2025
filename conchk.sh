@@ -1,104 +1,9 @@
 #!/bin/bash
 
+source ansi.sh
+source files.sh
+
 declare -a files
-
-sp=""
-cols=$(tput cols)
-
-for i in $(seq $cols); do
-	sp="$sp "
-done
-
-print(){
-	printf "\033[48;2;50;150;200m"
-	printf "$sp"
-	printf "\033[G"
-	printf "\033[38;2;255;255;255m"
-	echo "$1"
-	printf "\033[0m"
-}
-printSelec(){
-	printf "\033[48;2;250;150;50m"
-	printf "$sp"
-	printf "\033[G"
-	printf "\033[38;2;0;0;0m"
-	echo "$1"
-	printf "\033[0m"
-}
-printImp(){
-	printf "\033[48;2;50;50;250m"
-	for i in $(seq $cols); do
-		printf " "
-	done
-	printf "\033[G"
-	printf "\033[38;2;255;255;255m"
-	echo "$1"
-	printf "\033[0m"
-}
-printImpSelec(){
-	printf "\033[48;2;250;50;50m"
-	for i in $(seq $cols); do
-		printf " "
-	done
-	printf "\033[G"
-	printf "\033[38;2;0;0;0m"
-	echo "$1"
-	printf "\033[0m"
-}
-
-list(){
-	readarray -t files < links.txt
-	for i in "${files[@]}"; do
-		echo "$i"
-	done
-}
-
-add(){
-	if [ "$1" != "" ]; then
-	echo $1 >> links.txt
-	fi
-}
-
-br(){
-	echo "--------------------------------------------------"
-}
-
-del(){
-	readarray -t files < links.txt
-	> links.txt
-	for i in "${files[@]}"; do
-		if [ "$i" != "$1" ]; then
-			echo "$i" >> links.txt
-		fi
-	done
-}
-
-
-edit(){
-	readarray -t files < links.txt
-	> links.txt
-	for i in "${files[@]}"; do
-		if [ "$i" != "$1" ]; then
-			echo "$i" >> links.txt
-		else
-			echo "$2" >> links.txt
-		fi
-	done
-}
-
-check() {
-	readarray -t files < links.txt
-	for i in "${files[@]}"; do
-		response="$(curl -ILs $i | grep -o -E "^HTTP/[0-9.]+ [0-9]+" | grep -o -E " [0-9]+" | grep -o -E "[0-9]+"|tail -n1)"
-		if [ "$response" = "200" ]; then
-			echo "$i is Accessible"
-		elif [ "$response" = "" ]; then
-			echo "$i Does not Exist"
-		else
-			echo "$i Returned Status Code: $response"
-		fi
-	done
-}
 
 awaitInput(){
 	while true; do
@@ -133,25 +38,6 @@ awaitInput(){
 	done
 }
 
-moveCurUp(){
-	if (($1 > 0)); then
-		printf "\033[$1A"
-	fi
-}
-moveCurDown(){
-	if (($1 > 0)); then
-		printf "\033[$1B"
-	fi
-}
-
-hideCursor(){
-	printf "\033[?25l"
-}
-
-showCursor(){
-	printf "\033[?25h"
-}
-
 menu(){
 	pos=0
 	options=("$@")
@@ -162,15 +48,15 @@ menu(){
 	while true; do
 		for i in $(seq 0 $((len-2))); do
 			if [ "$pos" = "$i" ]; then
-				printSelec ">${options[$i]}"
+				echoSel ">${options[$i]}"
 			else
-				print " ${options[$i]}"
+				echo " ${options[$i]}"
 			fi
 		done
 		if [ "$pos" = "$((len-1))" ]; then
-				printImpSelec ">exit"
+				echoImpSel ">exit"
 		else
-				printImp "<exit"
+				echoImp "<exit"
 		fi
 
 		moveCurUp "$((len-pos))"
