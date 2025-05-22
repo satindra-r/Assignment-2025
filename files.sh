@@ -3,7 +3,7 @@
 declare -a files
 
 list(){
-	readarray -t files < links.txt
+	readarray -t files < ~/.config/conshk
 	for i in "${files[@]}"; do
 		echo "$i"
 	done
@@ -11,35 +11,35 @@ list(){
 
 add(){
 	if [ "$1" != "" ]; then
-	echo $1 >> links.txt
+	echo $1 >> ~/.config/conshk
 	fi
 }
 
 del(){
-	readarray -t files < links.txt
-	> links.txt
+	readarray -t files < ~/.config/conshk
+	> ~/.config/conshk
 	for i in "${files[@]}"; do
 		if [ "$i" != "$1" ]; then
-			echo "$i" >> links.txt
+			echo "$i" >> ~/.config/conshk
 		fi
 	done
 }
 
 
 edit(){
-	readarray -t files < links.txt
-	> links.txt
+	readarray -t files < ~/.config/conshk
+	> ~/.config/conshk
 	for i in "${files[@]}"; do
 		if [ "$i" != "$1" ]; then
-			echo "$i" >> links.txt
+			echo "$i" >> ~/.config/conshk
 		else
-			echo "$2" >> links.txt
+			echo "$2" >> ~/.config/conshk
 		fi
 	done
 }
 
 check() {
-	readarray -t files < links.txt
+	readarray -t files < ~/.config/conshk
 	for i in "${files[@]}"; do
 		response="$(curl -ILs $i | grep -o -E "^HTTP/[0-9.]+ [0-9]+" | grep -o -E " [0-9]+" | grep -o -E "[0-9]+"|tail -n1)"
 		if [ "$response" = "200" ]; then

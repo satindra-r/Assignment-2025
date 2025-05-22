@@ -114,7 +114,7 @@ interactive(){
 			"2")
 			while true; do
 				br
-				readarray -t files < links.txt
+				readarray -t files < ~/.config/conshk
 				menu "${files[@]}"
 				siteNo="$retVal"
 				if [[ "$siteNo" = "${#files[@]}" ]]; then
@@ -129,7 +129,7 @@ interactive(){
 			"3")
 			while true; do
 				br
-				readarray -t files < links.txt
+				readarray -t files < ~/.config/conshk
 				menu "${files[@]}"
 				siteNo="$retVal"
 				if [[ "$siteNo" = "${#files[@]}" ]]; then
