@@ -182,7 +182,7 @@ case "$1" in
 		edit "$2" "$3"
 	;;
 	"-p")
-		check "-b"
+		check
 	;;
 	"-pb")
 		check "-b"

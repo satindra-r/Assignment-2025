@@ -43,7 +43,7 @@ edit(){
 check() {
 	readarray -t files < ~/.config/conshk
 	len="${#files[@]}"
-	if [[ "$1" = "-b" ]]; then
+	if [[ "$1" = "-b"  && "$len" != "0" ]]; then
 		echo ""
 	fi
 	for i in $(seq 0 $((len-1))); do
@@ -62,7 +62,9 @@ check() {
 			echo "$site Returned Status Code: $response"
 		fi
 	done
-	moveCurUp $((len+1))
-	progressBar $len $len
-	moveCurDown $((len+1))
+	if [[ "$1" = "-b" && "$len" != "0" ]]; then
+		moveCurUp $((len+1))
+		progressBar $len $len
+		moveCurDown $((len+1))
+	fi
 }
