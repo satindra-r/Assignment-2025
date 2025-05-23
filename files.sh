@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ansi.sh
+
 declare -a files
 
 list(){
@@ -40,14 +42,27 @@ edit(){
 
 check() {
 	readarray -t files < ~/.config/conshk
-	for i in "${files[@]}"; do
-		response="$(curl -ILs $i | grep -o -E "^HTTP/[0-9.]+ [0-9]+" | grep -o -E " [0-9]+" | grep -o -E "[0-9]+"|tail -n1)"
+	len="${#files[@]}"
+	if [[ "$1" = "-b" ]]; then
+		echo ""
+	fi
+	for i in $(seq 0 $((len-1))); do
+		site=${files[$i]}
+		if [[ "$1" = "-b" ]]; then
+			moveCurUp $((i+1))
+			progressBar $i $len
+			moveCurDown $((i+1))
+		fi
+		response="$(curl -ILs $site | grep -o -E "^HTTP/[0-9.]+ [0-9]+" | grep -o -E " [0-9]+" | grep -o -E "[0-9]+"|tail -n1)"
 		if [ "$response" = "200" ]; then
-			echo "$i is Accessible"
+			echo "$site is Accessible"
 		elif [ "$response" = "" ]; then
-			echo "$i Does not Exist"
+			echo "$site Does not Exist"
 		else
-			echo "$i Returned Status Code: $response"
+			echo "$site Returned Status Code: $response"
 		fi
 	done
+	moveCurUp $((len+1))
+	progressBar $len $len
+	moveCurDown $((len+1))
 }

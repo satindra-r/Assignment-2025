@@ -40,3 +40,14 @@ hideCursor(){
 showCursor(){
 	printf "\033[?25h"
 }
+
+progressBar(){
+	progressLen=$(((50*$1)/$2))
+	for j in $(seq 0 $((progressLen-1))); do
+		printf "▓"
+	done
+	for j in $(seq $progressLen 49); do
+		printf "░"
+	done
+	echo ""
+}

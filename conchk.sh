@@ -147,7 +147,7 @@ interactive(){
 			;;
 			"4")
 				br
-				check
+				check "-b"
 			;;
 			"5")
 				break
@@ -164,6 +164,7 @@ echo "-a <site> (Add site to be tracked)"
 echo "-d <site> (Remove site from tracking)>"
 echo "-e <oldSite> <newSite> (Replace oldSite with newSite)"
 echo "-p (Ping all tracked sites)"
+echo "-pb (Ping all tracked sites with progress bar)"
 echo "-i (Open in interactive mode)"
 }
 
@@ -181,7 +182,10 @@ case "$1" in
 		edit "$2" "$3"
 	;;
 	"-p")
-		check
+		check "-b"
+	;;
+	"-pb")
+		check "-b"
 	;;
 	"-i")
 		interactive
