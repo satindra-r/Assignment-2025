@@ -2,40 +2,64 @@
 
 source ansi.sh
 source files.sh
+source controller.sh
 
 declare -a files
 
+raceLock=""
+
+sigStart(){
+	key="e"
+}
+
+sigStep(){
+	if [[ "$key" = "e" ]]; then
+		key="w"
+	elif [[ "$key" = "w" ]]; then
+		key="s"
+	fi
+}
+
+trap sigStart USR1
+trap sigStep USR2
+
 awaitInput(){
-	while true; do
-		key="-"
+	key="-"
+	awaitButton "$$" &
+	pid="$!"
+	while [[ "$key" = "-" ]]; do
 		char1=""
 		char2=""
-		read -rsn1 char1
-			if [ "$char1" = $'\e' ]; then
+		read -rsn1 -t 0.01 char1
+		if [[ "$?" = "0" ]]; then
+			if [[ "$char1" = $'\e' ]]; then
 				read -rsn2 -t 0.001 char2
-				if [ "$char2" = "[A" ]; then
-					key="w"
-				elif  [ "$char2" = "[B" ]; then
-					key="s"
-				#elif  [ "$REPLY" = "[C" ]; then
-				#	key="d"
-				#elif  [ "$REPLY" = "[D" ]; then
-				#	key="a"
+				if [[ "$char2" = "[A" ]]; then
+					retVal="w"
+					break
+				elif  [[ "$char2" = "[B" ]]; then
+					retVal="s"
+					break
 				fi
 			else
-				key="$char1"
+				case "$char1" in
+					"w"|"s")
+						retVal="$char1"
+						break
+					;;
+					" "|"")
+						retVal="e"
+						break
+					;;
+				esac
 			fi
-			case "$key" in
-				"w"|"s")
-					retVal="$key"
-					break
-				;;
-				" "|"")
-					retVal="e"
-					break
-				;;
-			esac
+		fi
 	done
+	if [[ "$key" != "-" ]]; then
+		sleep 0.02
+		retVal="$key"
+	fi
+	kill -term "$pid" 2> /dev/null
 }
 
 menu(){
@@ -47,13 +71,13 @@ menu(){
 
 	while true; do
 		for i in $(seq 0 $((len-2))); do
-			if [ "$pos" = "$i" ]; then
+			if [[ "$pos" = "$i" ]]; then
 				echoSel ">${options[$i]}"
 			else
 				echo " ${options[$i]}"
 			fi
 		done
-		if [ "$pos" = "$((len-1))" ]; then
+		if [[ "$pos" = "$((len-1))" ]]; then
 				echoImpSel ">exit"
 		else
 				echoImp "<exit"
@@ -103,7 +127,7 @@ interactive(){
 				br
 				printf "Enter website link or press enter to exit:"
 				read -r site
-				if [ "$site" = "" ]; then
+				if [[ "$site" = "" ]]; then
 					break
 				else
 					add "$site"
@@ -138,7 +162,7 @@ interactive(){
 					oldSite="${files[$siteNo]}"
 					printf "Enter new website link to replace $oldSite or press enter to exit:"
 					read -r newSite
-					if [ "$newSite" != "" ]; then
+					if [[ "$newSite" != "" ]]; then
 						edit "$oldSite" "$newSite"
 						echo "Edited $oldSite to $newSite"
 					fi
@@ -157,15 +181,15 @@ interactive(){
 }
 
 printHelp(){
-echo "Usage:"
-echo "-h (Display this message)"
-echo "-l (List all sites)"
-echo "-a <site> (Add site to be tracked)"
-echo "-d <site> (Remove site from tracking)>"
-echo "-e <oldSite> <newSite> (Replace oldSite with newSite)"
-echo "-p (Ping all tracked sites)"
-echo "-pb (Ping all tracked sites with progress bar)"
-echo "-i (Open in interactive mode)"
+	echo "Usage:"
+	echo "-h (Display this message)"
+	echo "-l (List all sites)"
+	echo "-a <site> (Add site to be tracked)"
+	echo "-d <site> (Remove site from tracking)>"
+	echo "-e <oldSite> <newSite> (Replace oldSite with newSite)"
+	echo "-p (Ping all tracked sites)"
+	echo "-pb (Ping all tracked sites with progress bar)"
+	echo "-i (Open in interactive mode)"
 }
 
 case "$1" in
@@ -188,6 +212,19 @@ case "$1" in
 		check "-b"
 	;;
 	"-i")
+		if [[ -e "/dev/input/js0" ]]; then
+			if [[ -r "/dev/input/js0" ]]; then
+				echoImp "Controller detected"
+			else
+				echoImp "Please run \"sudo usermod -aG input <username>\" then logout and login to enable controller input"
+			fi
+		else
+			echo "Controller not detected"
+		fi
+
+		if [[ (! -r "/dev/input/js0") && (-e "/dev/input/js0") ]]; then
+			>&2 echo "Please run \"sudo usermod -aG input <username>\" then logout and login to enable controller input"
+		fi
 		interactive
 	;;
 	*)

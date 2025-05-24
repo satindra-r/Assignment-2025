@@ -12,7 +12,7 @@ list(){
 }
 
 add(){
-	if [ "$1" != "" ]; then
+	if [[ "$1" != "" ]]; then
 	echo $1 >> ~/.config/conshk
 	fi
 }
@@ -21,7 +21,7 @@ del(){
 	readarray -t files < ~/.config/conshk
 	> ~/.config/conshk
 	for i in "${files[@]}"; do
-		if [ "$i" != "$1" ]; then
+		if [[ "$i" != "$1" ]]; then
 			echo "$i" >> ~/.config/conshk
 		fi
 	done
@@ -32,7 +32,7 @@ edit(){
 	readarray -t files < ~/.config/conshk
 	> ~/.config/conshk
 	for i in "${files[@]}"; do
-		if [ "$i" != "$1" ]; then
+		if [[ "$i" != "$1" ]]; then
 			echo "$i" >> ~/.config/conshk
 		else
 			echo "$2" >> ~/.config/conshk
@@ -54,9 +54,9 @@ check() {
 			moveCurDown $((i+1))
 		fi
 		response="$(curl -ILs $site | grep -o -E "^HTTP/[0-9.]+ [0-9]+" | grep -o -E " [0-9]+" | grep -o -E "[0-9]+"|tail -n1)"
-		if [ "$response" = "200" ]; then
+		if [[ "$response" = "200" ]]; then
 			echo "$site is Accessible"
-		elif [ "$response" = "" ]; then
+		elif [[ "$response" = "" ]]; then
 			echo "$site Does not Exist"
 		else
 			echo "$site Returned Status Code: $response"
